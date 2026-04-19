@@ -1,0 +1,12 @@
+body {
+    font-family: 'Times New Roman', Times, serif;
+    max-width: 800px;
+    margin: 40px auto;
+}
+
+.card {
+    background: #585857;
+    padding: 7%;
+    margin: 9px 0;
+    border-radius: 5px;
+}
