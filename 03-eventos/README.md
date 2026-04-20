@@ -2,7 +2,7 @@
 
 **Autor:** John Tigre
 
-## 1. Descripción de la solución implementada.
+## 1. Descripción de la solución implementada
 
 En esta práctica se desarrolló una interfaz web interactiva aplicando los conceptos fundamentales de eventos en el DOM con JavaScript. La solución aborda dos requerimientos principales sin el uso de librerías externas:
 
@@ -11,7 +11,7 @@ En esta práctica se desarrolló una interfaz web interactiva aplicando los conc
 
 ---
 
-## 2. Código destacado.
+## 2. Código destacado
 
 ### 2.1 Validación de formulario con `preventDefault()`
 Al momento de enviar el formulario, se intercepta el evento `submit` utilizando `e.preventDefault()`. Esto evita la recarga de la página web. A continuación, se ejecutan las funciones validadoras. Si todos los campos son correctos, se genera el DOM dinámicamente para mostrar los resultados; caso contrario, se detiene el flujo y se aplica el método `.focus()` al primer campo que presente un error para mejorar la experiencia del usuario.
@@ -81,21 +81,26 @@ document.addEventListener('keydown', (e) => {
 
 ---
 
-## 3. Capturas de la implementación.
+## 3. Capturas de la implementación
 
 A continuación se evidencia el correcto funcionamiento de las funcionalidades desarrolladas:
 
 **Validación en acción:**
+
 ![Validación en acción](assets/01-validacion.png)
 
 **Formulario procesado:**
+
 ![Formulario procesado](assets/02-formulario-enviado.png)
 
 **Event delegation funcionando:**
+
 ![Event delegation funcionando](assets/03-delegacion.png)
 
 **Contador de tareas actualizado:**
+
 ![Contador de tareas actualizado](assets/04-contador-actualizado.png)
 
 **Tareas completadas:**
+
 ![Tareas completadas](assets/05-tareas-completadas.png)
