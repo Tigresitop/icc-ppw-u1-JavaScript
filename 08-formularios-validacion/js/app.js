@@ -1,155 +1,178 @@
 'use strict';
 
-const form = document.querySelector('#form-registro');
-const btnSubmit = document.querySelector('#btn-submit');
-const mensajeGlobal = document.querySelector('#mensaje-global');
+/* =========================
+    SELECCIÓN DE ELEMENTOS
+========================= */
+const formRegistro = document.querySelector('#form-registro');
 const inputPassword = document.querySelector('#password');
+const inputConfirmarPassword = document.querySelector('#confirmar_password');
 const inputTelefono = document.querySelector('#telefono');
+const passwordStrength = document.querySelector('#password-strength');
+const btnEnviar = document.querySelector('#btn-enviar');
+const btnLimpiar = document.querySelector('#btn-limpiar');
+const mensajeEstado = document.querySelector('#mensaje-estado');
+const resultadoRegistro = document.querySelector('#resultado-registro');
 
 /* =========================
-    FUNCIONALIDAD EXTRA: MÁSCARA TELÉFONO
+    FUNCIONES PRINCIPALES
 ========================= */
-inputTelefono.addEventListener('input', (e) => {
-  let valor = e.target.value.replace(/\D/g, ''); // Remover todo lo que no sea dígito
-    if (valor.length > 10) valor = valor.slice(0, 10);
+function validarCampoConFeedback(campo) {
+    const resultado = ValidacionService.validarCampo(campo);
 
-  // Formato: (099) 999-9999
-    if (valor.length > 6) {
-    valor = `(${valor.slice(0, 3)}) ${valor.slice(3, 6)}-${valor.slice(6)}`;
-    } else if (valor.length > 3) {
-    valor = `(${valor.slice(0, 3)}) ${valor.slice(3)}`;
-    } else if (valor.length > 0) {
-    valor = `(${valor}`;
-    }
-
-    e.target.value = valor;
-});
-
-/* =========================
-    FUERZA DE CONTRASEÑA
-========================= */
-function evaluarFuerzaPassword(password) {
-    let fuerza = 0;
-    if (password.length >= 8) fuerza++;
-    if (password.length >= 12) fuerza++;
-    if (/[a-z]/.test(password) && /[A-Z]/.test(password)) fuerza++;
-    if (/\d/.test(password)) fuerza++;
-    if (/[^a-zA-Z0-9]/.test(password)) fuerza++;
-
-    const niveles = ['', 'Muy débil', 'Débil', 'Media', 'Fuerte', 'Muy fuerte'];
-    const colores = ['', '#e74c3c', '#e67e22', '#f1c40f', '#2ecc71', '#27ae60'];
-
-    return { nivel: niveles[fuerza], color: colores[fuerza] };
-}
-
-inputPassword.addEventListener('input', (e) => {
-    const password = e.target.value;
-    const indicador = document.querySelector('#password-strength');
-
-    if (password.length > 0) {
-    const fuerza = evaluarFuerzaPassword(password);
-    indicador.textContent = `Seguridad: ${fuerza.nivel}`;
-    indicador.style.color = fuerza.color;
+    if (!resultado.valido) {
+        mostrarError(campo, resultado.error);
     } else {
-        indicador.textContent = '';
+        limpiarError(campo);
     }
-});
+}
 
-/* =========================
-    FUNCIONALIDAD EXTRA: AUTOGUARDADO (SessionStorage)
-========================= */
-function guardarBorrador() {
-    const formData = new FormData(form);
+function actualizarIndicadorFuerza(password) {
+    if (!password) {
+    passwordStrength.textContent = '';
+    passwordStrength.className = 'password-strength';
+    return;
+    }
+
+    const fuerza = ValidacionService.evaluarFuerzaPassword(password);
+
+    passwordStrength.textContent = `Fortaleza: ${fuerza.nivel}`;
+    passwordStrength.className = `password-strength ${fuerza.clase}`;
+}
+
+function verificarCamposLlenos(form) {
+    const camposRequeridos = form.querySelectorAll('[required]');
+
+    return [...camposRequeridos].every(campo => {
+    if (campo.type === 'checkbox') {
+        return campo.checked;
+    }
+    return campo.value.trim() !== '';
+    });
+}
+
+function actualizarBotonEnviar(form) {
+    const todosLlenos = verificarCamposLlenos(form);
+    btnEnviar.disabled = !todosLlenos;
+}
+
+function procesarEnvio(formData) {
     const datos = Object.fromEntries(formData);
-  // Guardar estado del checkbox explícitamente
-    datos.terminos = form.querySelector('#terminos').checked;
-    sessionStorage.setItem('form_borrador', JSON.stringify(datos));
-}
 
-function restaurarBorrador() {
-    const borrador = JSON.parse(sessionStorage.getItem('form_borrador'));
-    if (borrador) {
-    Object.entries(borrador).forEach(([name, value]) => {
-        const campo = form.querySelector(`[name="${name}"]`);
-        if (campo) {
-        if (campo.type === 'checkbox') {
-            campo.checked = value;
-        } else {
-            campo.value = value;
-        }
-        }
+  // Agregar el checkbox manualmente
+    datos.terminos = formRegistro.querySelector('#terminos').checked;
+
+    console.log('Datos a enviar:', datos);
+
+    mostrarMensajeTemporal(
+    mensajeEstado,
+    MensajeExito('Registro completado exitosamente. Los datos se muestran abajo.'),
+    5000
+    );
+
+    renderizarResultado(datos, resultadoRegistro);
+
+    formRegistro.reset();
+
+    const campos = formRegistro.querySelectorAll('input, select, textarea');
+    campos.forEach(campo => {
+    campo.classList.remove('campo--valido', 'campo--error');
     });
-    actualizarBotonSubmit();
-    }
+
+    passwordStrength.textContent = '';
+    passwordStrength.className = 'password-strength';
+
+    actualizarBotonEnviar(formRegistro);
+
+    resultadoRegistro.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
 /* =========================
-    VALIDACIÓN EN TIEMPO REAL
+    EVENT LISTENERS
 ========================= */
-function actualizarBotonSubmit() {
-    const campos = form.querySelectorAll('input[required], select[required]');
-    let todosLlenos = true;
-
-    campos.forEach(c => {
-        if (c.type === 'checkbox' && !c.checked) todosLlenos = false;
-        else if (c.type !== 'checkbox' && !c.value.trim()) todosLlenos = false;
-    });
-
-    btnSubmit.disabled = !todosLlenos;
-}
-
-// Delegación de eventos para validar al salir del campo
-form.addEventListener('focusout', (e) => {
-    if (e.target.matches('input, select')) {
-        validarCampo(e.target);
-        actualizarBotonSubmit();
-    }
-});
-
-// Limpiar error y autoguardar mientras se escribe
-form.addEventListener('input', (e) => {
-    if (e.target.matches('input, select')) {
-    limpiarError(e.target);
-    actualizarBotonSubmit();
-    guardarBorrador();
-    }
-});
-
-/* =========================
-    ENVÍO DEL FORMULARIO
-========================= */
-form.addEventListener('submit', (e) => {
+formRegistro.addEventListener('submit', (e) => {
     e.preventDefault();
 
-    if (validarFormulario(form)) {
-    // Recopilar datos excluyendo confirmación de contraseña
-    const datosFinales = Object.fromEntries(new FormData(form));
-    delete datosFinales.confirmar_password;
+    const formularioValido = ValidacionService.validarFormulario(formRegistro);
 
-    console.log('✅ Formulario válido. Datos enviados:', datosFinales);
+    if (!formularioValido) {
+    mostrarMensajeTemporal(
+        mensajeEstado,
+        MensajeError('Por favor, corrige los errores en el formulario antes de continuar.'),
+        5000
+    );
     
-    // Mostrar mensaje de éxito
-    mensajeGlobal.textContent = '¡Registro completado exitosamente!';
-    mensajeGlobal.className = 'mensaje-global exito';
+    const primerError = formRegistro.querySelector('.campo--error');
+    if (primerError) {
+        primerError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        primerError.focus();
+    }
     
-    // Limpiar estado
-    form.reset();
-    sessionStorage.removeItem('form_borrador');
-    btnSubmit.disabled = true;
-    
-    // Limpiar bordes verdes y texto de password
-    form.querySelectorAll('.campo--valido').forEach(c => c.classList.remove('campo--valido'));
-    document.querySelector('#password-strength').textContent = '';
+    return;
+    }
 
-    // Ocultar mensaje global después de 5 segundos
-    setTimeout(() => {
-        mensajeGlobal.style.display = 'none';
-        mensajeGlobal.className = 'mensaje-global';
-    }, 5000);
-    } else {
-        console.warn('❌ El formulario contiene errores.');
+    const formData = new FormData(formRegistro);
+    procesarEnvio(formData);
+});
+
+formRegistro.addEventListener('focusout', (e) => {
+    if (e.target.matches('input, select, textarea')) {
+    validarCampoConFeedback(e.target);
     }
 });
 
-// Iniciar app
-document.addEventListener('DOMContentLoaded', restaurarBorrador);
+formRegistro.addEventListener('input', (e) => {
+    if (e.target.matches('input, textarea')) {
+    const errorDiv = e.target.parentElement.querySelector('.error-mensaje');
+    if (errorDiv && errorDiv.textContent) {
+        limpiarError(e.target);
+    }
+    }
+
+    actualizarBotonEnviar(formRegistro);
+});
+
+inputPassword.addEventListener('input', (e) => {
+    actualizarIndicadorFuerza(e.target.value);
+});
+
+inputTelefono.addEventListener('input', (e) => {
+    aplicarMascaraTelefono(e.target);
+});
+
+inputPassword.addEventListener('input', () => {
+    if (inputConfirmarPassword.value) {
+    validarCampoConFeedback(inputConfirmarPassword);
+    }
+});
+
+btnLimpiar.addEventListener('click', () => {
+    if (confirm('¿Estás seguro de que deseas limpiar el formulario?')) {
+    formRegistro.reset();
+    
+    const campos = formRegistro.querySelectorAll('input, select, textarea');
+    campos.forEach(campo => {
+        campo.classList.remove('campo--valido', 'campo--error');
+        const errorDiv = campo.parentElement.querySelector('.error-mensaje');
+        if (errorDiv) {
+        errorDiv.textContent = '';
+        }
+    });
+
+    passwordStrength.textContent = '';
+    passwordStrength.className = 'password-strength';
+
+    limpiarResultado(resultadoRegistro);
+
+    mensajeEstado.classList.add('oculto');
+
+    actualizarBotonEnviar(formRegistro);
+
+    document.querySelector('#nombre').focus();
+    }
+});
+
+/* =========================
+    INICIALIZACIÓN
+========================= */
+actualizarBotonEnviar(formRegistro);
+document.querySelector('#nombre').focus();
