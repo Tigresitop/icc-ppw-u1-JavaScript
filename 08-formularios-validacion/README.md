@@ -2,9 +2,9 @@
 
 **Autor:** John Tigre
 
-## 1. Descripción
+## 1. Descripción Breve de la Solución
 
-En esta práctica se desarrolló un formulario de registro interactivo empleando validaciones personalizadas con JavaScript puro. Se desactivó la validación nativa del navegador mediante el atributo `novalidate` para tomar control total del *feedback* visual, evaluando las entradas del usuario en tiempo real (mediante los eventos `input` y `focusout`). El sistema aplica reglas lógicas y Expresiones Regulares (REGEX) para 8 campos distintos, previniendo el envío de datos incorrectos. Adicionalmente, se integraron características avanzadas de experiencia de usuario (UX) como una máscara de formato telefónico automático y el autoguardado de borradores en el `sessionStorage`.
+En esta práctica se desarrolló un formulario de registro interactivo empleando validaciones personalizadas con JavaScript Vanilla. Se desactivó la validación nativa del navegador mediante el atributo `novalidate` para tomar control total del *feedback* visual, evaluando las entradas del usuario en tiempo real (mediante los eventos `input` y `focusout`). El sistema aplica reglas lógicas y Expresiones Regulares (REGEX) para 8 campos distintos, previniendo el envío de datos incorrectos. Adicionalmente, se integraron características avanzadas de experiencia de usuario (UX) como una máscara de formato telefónico automático y el autoguardado de borradores en el `sessionStorage`.
 
 ---
 
@@ -73,33 +73,49 @@ form.addEventListener('submit', (e) => {
 A continuación, se presentan las pruebas de funcionamiento de los distintos estados del formulario:
 
 ### 1. Formulario inicial
+
 ![Formulario Vacío](assets/01-formulario.png)
+
 **Descripción:** Vista inicial del formulario de registro renderizado con sus 8 campos correspondientes en estado neutro.
 
 ### 2. Errores de Validación
+
 ![Errores de Validación](assets/02-errores-validacion.png)
+
 **Descripción:** *Feedback* visual en tiempo real. Los campos obligatorios muestran un contorno rojo y el mensaje específico de error tras perder el foco (`focusout`) estando vacíos.
 
 ### 3. Campos Válidos
+
 ![Campos Válidos](assets/03-campos-validos.png)
+
 **Descripción:** El sistema reconoce los valores correctos mediante REGEX y lógica de negocio, aplicando un borde verde como indicador de éxito.
 
 ### 4. Fuerza de Contraseña
+
 ![Fuerza Contraseña](assets/04-fuerza-contraseña.png)
+
 **Descripción:** Un evaluador en tiempo real analiza la entropía de la clave a medida que el usuario escribe, indicando niveles como "Muy débil", "Media" o "Fuerte".
 
 ### 5. Confirmación de Password
+
 ![Confirmación Coinciden](assets/05-coinciden.png)
+
 **Descripción:** Validación cruzada que bloquea el proceso si la confirmación de la contraseña no coincide exactamente con el valor original tecleado.
 
 ### 6. Envío Exitoso
+
 ![Envío](assets/06-envio.png)
+
 **Descripción:** Tras una validación exitosa en todos los campos, se intercepta el `submit` y los datos recopilados por `FormData` se muestran correctamente procesados en la consola del navegador.
 
 ### 7. Funcionalidad Extra (Autoguardado y Máscara)
+
 ![Extra](assets/07-extra.png)
-**Descripción:** Se visualiza el panel de DevTools (*Application*) demostrando el registro de las entradas en `sessionStorage`. Adicionalmente, el campo de teléfono muestra la máscara visual `(099) 999-9999` aplicada dinámicamente.
+
+**Descripción:** Se visualiza el panel de DevTools (*Application*) demostrando el registro de las entradas en `sessionStorage`. Adicionalmente, el campo de teléfono muestra la máscara visual aplicada dinámicamente.
 
 ### 8. Código de Validación
+
 ![Código](assets/08-codigo.png)
+
 **Descripción:** Captura de la función central `validarCampo()` demostrando la evaluación y el control de flujo basado en el atributo `name` de los campos.
